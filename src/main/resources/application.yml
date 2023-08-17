@@ -1,0 +1,85 @@
+spring:
+  redis:
+    host: 192.168.133.3
+    #数据库索引
+    database: 0
+    port: 6379
+    #password:
+    #连接超时时间（ms）
+    timeout: 5000
+    # 自定义redis默认过期时间（单位：时）
+    expire-time: 24
+    jedis:
+      pool:
+        # 连接池最大连接数（使用负值表示没有限制）
+        max-active: -1
+        # 连接池最大阻塞等待时间（使用负值表示没有限制）
+        max-wait: -1
+
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/selectcourse?characterEncoding=utf-8&serverTimezone=GMT%2B8
+#    username: root
+#    password: root
+
+  shardingsphere:
+    # 配置数据源
+    datasource:
+      # 给每个数据源取别名，任意取
+      names: master,slave
+      # 配置主数据源数据库连接信息（只写）
+      master:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://192.168.133.3:3306/selectcourse?characterEncoding=utf-8&serverTimezone=GMT%2B8
+        username: root
+        password: 123456
+      # 配置从数据源数据库连接信息（只读）
+      slave:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://192.168.133.5:3306/selectcourse?characterEncoding=utf-8&serverTimezone=GMT%2B8
+        username: root
+        password: 123456
+    masterslave:
+      # 配置 slave 节点的负载均衡策略 ：轮询机制
+      load-balance-algorithm-type: round_robin
+      name: dataSource
+      # 配置主库 ，负责数据的写入
+      master-data-source-name: master
+      # 配置从库
+      slave-data-source-names: slave
+    # 显示SQL
+    props:
+      sql:
+        show: true
+  main:
+    allow-bean-definition-overriding: true
+  kafka:
+    producer:
+      bootstrap-servers: 192.168.133.3:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+
+    consumer:
+
+      group-id: test
+
+      enable-auto-commit: true
+      bootstrap-servers: 192.168.133.3:9092
+
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+
+kafka:
+  topic:
+    test: quickstart-events
+
+
+server:
+  port: 80
+logging:
+  level:
+    root: DEBUG
